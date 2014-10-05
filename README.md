@@ -63,15 +63,21 @@ puts Topology.scale('floating-retreat-4255', topology)
 
 ### Add/Modify Config Variables
 
-You can still use the `platform-api` built in code. Here is an example on how to with modifying your app's configuration variables. Just pass in a hash with your app name to set/modify a configuration variable.
+Just pass in a hash with your app name to set/modify a configuration variable.
 
 ```ruby
-heroku = PlatformAPI.connect_oauth ENV['HEROKU_TOKEN']
-heroku.config_var.update('floating-retreat-4255', {'MYAPP' => 'ROCKS'})
+ConfigVariable.set('floating-retreat-4255', 'MYAPP' => 'ROCKS')
 => {"HEROKU_POSTGRESQL_COBALT_URL"=>"postgres://<redacted>",
     "MYAPP"=>"ROCKS"}
 ```
 
+You can query for the current set of environment variables like this
+
+```ruby
+ConfigVariable.current('floating-retreat-4255')
+=> {"HEROKU_POSTGRESQL_COBALT_URL"=>"postgres://<redacted>",
+    "MYAPP"=>"ROCKS"}
+```
 
 Hopefully this has given you a taste of how the client works.  If you have
 questions please feel free to file issues.

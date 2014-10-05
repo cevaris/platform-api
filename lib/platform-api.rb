@@ -33,6 +33,18 @@ class Dyno
   end
 end
 
+class ConfigVariable
+  def self.set(app_name, opts)
+    heroku = PlatformAPI.connect_oauth(ENV['HEROKU_TOKEN'], cache: Moneta.new(:Null))
+    heroku.config_var.update(app_name, opts)
+  end
+
+  def self.current(app_name)
+    heroku = PlatformAPI.connect_oauth(ENV['HEROKU_TOKEN'], cache: Moneta.new(:Null))
+    heroku.config_var.info(app_name)
+  end
+end
+
 class Topology
   # Scales the given Heroku application to supplied topology.
   #
@@ -53,6 +65,8 @@ class Topology
     response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] }
     # self.agg(response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] })
   end
+
+  
 
   private
 
