@@ -7,19 +7,13 @@ Ruby HTTP client for the Heroku API. Specifically for dynamically scaling your a
 Add this line to your application's Gemfile:
 
 ```
-gem 'platform-api'
+gem 'platform-api', :git => 'https://github.com/cevaris/platform-api.git'
 ```
 
 And then execute:
 
 ```
 bundle
-```
-
-Or install it yourself as:
-
-```
-gem install platform-api
 ```
 
 ### Get Setup with your Heroku Token

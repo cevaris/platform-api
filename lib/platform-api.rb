@@ -12,6 +12,8 @@ class Dyno
   DEFAULT_COUNT='1'
   DEFAULT_SIZE='1X'
 
+  attr_reader :process, :count, :size
+
   # Initialize an Dyno or partial Dyno topology; ex (1 web, 3 Workers)
   #
   # @param [Dyno] class, [Web],[Worker]
