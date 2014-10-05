@@ -49,7 +49,7 @@ class Topology
   def self.current(app_name)
     heroku = PlatformAPI.connect_oauth ENV['HEROKU_TOKEN']
     response = heroku.dyno.list(app_name)
-    response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] }
+    self.agg(response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] })
   end
 
   private
@@ -59,6 +59,15 @@ class Topology
     when 'web'; Web
     when 'worker'; Worker
     else raise "No such dyno type #{t}"; end
+  end
+
+  def self.agg(dynos)
+    [ 
+      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'web' ? d.count : 0 }, '1X'),
+      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'web' ? d.count : 0 }, '2X'),
+      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'worker' ? d.count : 0 }, '1X'),
+      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'worker' ? d.count : 0 }, '2X')
+    ].select {|d| d.count > 0}
   end
 end
 
