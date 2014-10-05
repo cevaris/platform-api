@@ -1,6 +1,6 @@
-# Platform API
+# Custom Heroku Platform API
 
-Ruby HTTP client for the Heroku API.
+Ruby HTTP client for the Heroku API. Specifically for dynamically scaling your app. 
 
 ## Installation
 
@@ -48,7 +48,7 @@ export HEROKU_TOKEN=e7dd6ad7-3c6a-411e-a2be-c9fe52ac7ed2
 
 
 ```ruby
-Topology.current('floating-retreat-4255'')
+Topology.current('floating-retreat-4255')
 => [#<Dyno:0x007fe919543d00 @count=1, @process="web", @size="1X">,
  #<Dyno:0x007fe919542a90 @count=1, @process="worker", @size="1X">]
 ```
@@ -69,9 +69,10 @@ puts Topology.scale('floating-retreat-4255', topology)
 
 ### Add/Modify Config Variables
 
-Just pass in a hash with your app name to set/modify a configuration variable.
+You can still use the `platform-api` built in code. Here is an example on how to with modifying your app's configuration variables. Just pass in a hash with your app name to set/modify a configuration variable.
 
 ```ruby
+heroku = PlatformAPI.connect_oauth ENV['HEROKU_TOKEN']
 heroku.config_var.update('floating-retreat-4255', {'MYAPP' => 'ROCKS'})
 => {"HEROKU_POSTGRESQL_COBALT_URL"=>"postgres://<redacted>",
     "MYAPP"=>"ROCKS"}
