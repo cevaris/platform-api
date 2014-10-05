@@ -22,6 +22,7 @@ class Dyno
   # @return [Dyno] A type of Dyno with all the info needed to modify 
   #     given apps topology.
   def initialize(process, count=DEFAULT_COUNT, size=DEFAULT_SIZE)
+    puts "#{process}, #{count}, #{size}"
     @process = process.to_s.downcase
     @count = count
     @size = size
@@ -40,16 +41,17 @@ class Topology
   # @param [topology] of this/these Dynos to be set
   # @return Current state of topology
   def self.scale(app_name, topology)
-    heroku = PlatformAPI.connect_oauth ENV['HEROKU_TOKEN']
+    heroku = PlatformAPI.connect_oauth(ENV['HEROKU_TOKEN'], cache: Moneta.new(:Null))
     params = { updates: topology.collect {|t| t.to_p } }
     heroku.formation.batch_update( app_name, params )
     self.current(app_name)
   end
 
   def self.current(app_name)
-    heroku = PlatformAPI.connect_oauth ENV['HEROKU_TOKEN']
+    heroku = PlatformAPI.connect_oauth(ENV['HEROKU_TOKEN'], cache: Moneta.new(:Null))
     response = heroku.dyno.list(app_name)
-    self.agg(response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] })
+    response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] }
+    # self.agg(response.collect { |d| Dyno.new self.from_type(d['type']), 1, d['size'] })
   end
 
   private
@@ -61,14 +63,32 @@ class Topology
     else raise "No such dyno type #{t}"; end
   end
 
-  def self.agg(dynos)
-    [ 
-      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'web' ? d.count : 0 }, '1X'),
-      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'web' ? d.count : 0 }, '2X'),
-      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'worker' ? d.count : 0 }, '1X'),
-      Dyno.new(Web, dynos.inject(0) {|sum, d| d.process == 'worker' ? d.count : 0 }, '2X')
-    ].select {|d| d.count > 0}
-  end
+  # def self.agg(dynos)
+  #   puts dynos.inspect
+  #   [ 
+  #     dynos.select {|d| d.process == 'web'    and d.size == '1X' and d.count > 0 },
+  #     dynos.select {|d| d.process == 'web'    and d.size == '2X' and d.count > 0 },
+  #     dynos.select {|d| d.process == 'worker' and d.size == '1X' and d.count > 0 },
+  #     dynos.select {|d| d.process == 'worker' and d.size == '2X' and d.count > 0 },
+  #     # Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '1X') ? d.count : 0 }, '1X'),
+  #     # Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '2X') ? d.count : 0 }, '2X'),
+  #     # Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '1X') ? d.count : 0 }, '1X'),
+  #     # Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '2X') ? d.count : 0 }, '2X')
+  #   ]
+  #   # [ 
+  #   #   Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '1X') ? d.count : 0 }, '1X'),
+  #   #   Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '2X') ? d.count : 0 }, '2X'),
+  #   #   Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '1X') ? d.count : 0 }, '1X'),
+  #   #   Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '2X') ? d.count : 0 }, '2X')
+  #   # ].select {|d| d.count > 0}
+  #   # puts dynos.inspect
+  #   # [ 
+  #   #   Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '1X') ? d.count : 0 }, '1X'),
+  #   #   Dyno.new(Web,    dynos.inject(0) {|sum, d| (d.process == 'web'    and d.size == '2X') ? d.count : 0 }, '2X'),
+  #   #   Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '1X') ? d.count : 0 }, '1X'),
+  #   #   Dyno.new(Worker, dynos.inject(0) {|sum, d| (d.process == 'worker' and d.size == '2X') ? d.count : 0 }, '2X')
+  #   # ].select {|d| d.count > 0}
+  # end
 end
 
 class Worker < Dyno; end
