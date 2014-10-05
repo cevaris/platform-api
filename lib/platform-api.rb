@@ -8,13 +8,6 @@ end
 require 'platform-api/client'
 require 'platform-api/version'
 
-
-class Hash
-  def slice(keys)
-    self.reject { |x| !keys.include?(x.to_s) }
-  end
-end
-
 class Dyno
   DEFAULT_COUNT='1'
   DEFAULT_SIZE='1X'
