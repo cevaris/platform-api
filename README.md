@@ -36,48 +36,21 @@ Created OAuth authorization.
   Token:       e7dd6ad7-3c6a-411e-a2be-c9fe52ac7ed2
 ```
 
-Use the `Token` value when instantiating a client:
+Export the `Token` value a the environment variable `HEROKU_TOKEN`:
 
-```ruby
-require 'platform-api'
-heroku = PlatformAPI.connect_oauth('e7dd6ad7-3c6a-411e-a2be-c9fe52ac7ed2')
+```
+export HEROKU_TOKEN=e7dd6ad7-3c6a-411e-a2be-c9fe52ac7ed2
+
 ```
 
-### Grab info from your Heroku App
+### Grab Current Dyno info from your Heroku App
 
-We can read the same information back with the `info` method.
+
 
 ```ruby
-heroku.app.info('floating-retreat-4255')
-=> {"id"=>22979756,
-    "name"=>"floating-retreat-4255",
-    "dynos"=>0,
-    "workers"=>0,
-    "repo_size"=>nil,
-    "slug_size"=>nil,
-    "stack"=>"cedar",
-    "requested_stack"=>nil,
-    "create_status"=>"complete",
-    "repo_migrate_status"=>"complete",
-    "owner_delinquent"=>false,
-    "owner_email"=>"jkakar@heroku.com",
-    "owner_name"=>nil,
-    "domain_name"=>
-     {"id"=>nil,
-      "app_id"=>22979756,
-      "domain"=>"floating-retreat-4255.herokuapp.com",
-      "base_domain"=>"herokuapp.com",
-      "created_at"=>nil,
-      "default"=>true,
-      "updated_at"=>nil},
-    "web_url"=>"http://floating-retreat-4255.herokuapp.com/",
-    "git_url"=>"git@heroku.com:floating-retreat-4255.git",
-    "buildpack_provided_description"=>nil,
-    "region"=>"us",
-    "created_at"=>"2014/03/12 16:44:09 -0700",
-    "archived_at"=>nil,
-    "released_at"=>"2014/03/12 16:44:12 -0700",
-    "updated_at"=>"2014/03/12 16:44:12 -0700"}
+Topology.current('floating-retreat-4255'')
+=> [#<Dyno:0x007fe919543d00 @count=1, @process="web", @size="1X">,
+ #<Dyno:0x007fe919542a90 @count=1, @process="worker", @size="1X">]
 ```
 
 ### Scaling Heroku Applications
